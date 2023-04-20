@@ -147,14 +147,12 @@ class HBNBCommand(cmd.Cmd):
             params[key] = value
 
         # Create a new instance of the specified class with the given params
-        obj = HBNBCommand.classes[class_name](**params)
+        new_instance = HBNBCommand.classes[class_name](**params)
 
         # Save the object to the JSON file
-        self.storage.new(obj)
-        self.storage.save()
-
-        print(obj.id)
-
+        storage.save()
+        print(new_instance.id)
+        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
