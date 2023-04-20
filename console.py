@@ -127,7 +127,7 @@ class HBNBCommand(cmd.Cmd):
         args = arg.split()
         class_name = args[0]
 
-        if class_name not in self.classes:
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
 
@@ -147,7 +147,7 @@ class HBNBCommand(cmd.Cmd):
             params[key] = value
 
         # Create a new instance of the specified class with the given params
-        obj = self.classes[class_name](**params)
+        obj = HBNBCommand.classes[class_name](**params)
 
         # Save the object to the JSON file
         self.storage.new(obj)
