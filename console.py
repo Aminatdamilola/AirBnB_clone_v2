@@ -113,64 +113,44 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, arg):
+    def do_create(self, line):
+        """Creates a new instance of BaseModel, saves it
+        Exceptions:
+            SyntaxError: when there is no args given
+            NameError: when there is no object taht has the name
         """
-        Creates a new instance of a specified class and saves it to the JSON file.
-        Usage: create <Class name> <param 1> <param 2> <param 3>...
-        Param syntax: <key name>=<value>
-        Value syntax: String: "<value>", Float: <unit>.<decimal>, Integer: <number>
-        """
-        if not arg:
-            print("** class name missing **")
-            return
-
-        args = arg.split()
-        if len(args) < 2:
-            print("Usage: create <Class name> <param 1> <param 2> <param 3>...")
-            return
-
-        class_name = args[0]
-
-        if class_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        # Parse the params
-        class_name = args[0]
-        params = {}
-        for param in args[1:]:
-            key_value = param.split("=")
-            if len(key_value) == 2:
-            key, value = key_value
-
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace('_', ' ').replace('\\"', '"')
-           """ value = value.strip('"') # remove outer quotes from string values
-            value = value.replace("_", " ") # replace underscores with spaces"""
-
-            elif '.' in value:
-                try:
-                    value = float(value)
-                except ValueError:
-                    continue
-
-            else:
-                try:
-                    value = int(value)
-                except ValueError:
-                    pass # ignore values that can't be converted to int or float
-            params[key] = value
-
         try:
-        # Create a new instance of the specified class with the given params
-            new_instance = HBNBCommand.classes[class_name](**params)
-            print(f"{class_name} object created: {new_instance}")
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")  # split cmd line into list
+
+            if my_list:  # if list not empty
+                cls_name = my_list[0]  # extract class name
+            else:  # class name missing
+                raise SyntaxError()
+
+            kwargs = {}
+
+            for pair in my_list[1:]:
+                k, v = pair.split("=")
+                if self.is_int(v):
+                    kwargs[k] = int(v)
+                elif self.is_float(v):
+                    kwargs[k] = float(v)
+                else:
+                    v = v.replace('_', ' ')
+                    kwargs[k] = v.strip('"\'')
+
+            obj = self.all_classes[cls_name](**kwargs)
+            storage.new(obj)  # store new object
+            obj.save()  # save storage to file
+            print(obj.id)  # print id of created object class
+
+        except SyntaxError:
+            print("** class name missing **")
         except KeyError:
-            print(f"Error: {class_name} is not defined")
-        # Save the object to the JSON file
-        storage.new(new_instance)
-        storage.save()
-        print(new_instance.id)
+            print("** class doesn't exist **")
+
 
     def help_create(self):
         """ Help information for the create method """
