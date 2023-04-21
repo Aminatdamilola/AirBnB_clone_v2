@@ -125,6 +125,10 @@ class HBNBCommand(cmd.Cmd):
             return
 
         args = arg.split()
+        if len(args) < 2:
+            print("Usage: create <Class name> <param 1> <param 2> <param 3>...")
+            return
+
         class_name = args[0]
 
         if class_name not in HBNBCommand.classes:
@@ -132,23 +136,37 @@ class HBNBCommand(cmd.Cmd):
             return
 
         # Parse the params
+        class_name = args[0]
         params = {}
-        for arg in args[1:]:
-            key, value = arg.split("=")
-            value = value.strip('"') # remove outer quotes from string values
-            value = value.replace("_", " ") # replace underscores with spaces
-            try:
-                value = int(value)
-            except ValueError:
+        for param in args[1:]:
+            key_value = param.split("=")
+            if len(key_value) == 2:
+            key, value = key_value
+
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+           """ value = value.strip('"') # remove outer quotes from string values
+            value = value.replace("_", " ") # replace underscores with spaces"""
+
+            elif '.' in value:
                 try:
                     value = float(value)
+                except ValueError:
+                    continue
+
+            else:
+                try:
+                    value = int(value)
                 except ValueError:
                     pass # ignore values that can't be converted to int or float
             params[key] = value
 
+        try:
         # Create a new instance of the specified class with the given params
-        new_instance = HBNBCommand.classes[class_name](**params)
-
+            obj = HBNBCommand.classes[class_name](**params)
+            print(f"{class_name} object created: {obj}")
+        except KeyError:
+            print(f"Error: {class_name} is not defined")
         # Save the object to the JSON file
         storage.new(new_instance)
         storage.save()
