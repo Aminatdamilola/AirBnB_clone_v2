@@ -113,43 +113,31 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, line):
+    def do_create(self, arg):
         """Creates a new instance of BaseModel, saves it
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
         """
         try:
-            if not line:
+            if not arg:
                 raise SyntaxError()
-            my_list = line.split(" ")  # split cmd line into list
-
-            if my_list:  # if list not empty
-                cls_name = my_list[0]  # extract class name
-            else:  # class name missing
-                raise SyntaxError()
-
-            kwargs = {}
-
-            for pair in my_list[1:]:
-                k, v = pair.split("=")
-                if self.is_int(v):
-                    kwargs[k] = int(v)
-                elif self.is_float(v):
-                    kwargs[k] = float(v)
-                else:
-                    v = v.replace('_', ' ')
-                    kwargs[k] = v.strip('"\'')
-
-            obj = self.all_classes[cls_name](**kwargs)
-            storage.new(obj)  # store new object
-            obj.save()  # save storage to file
-            print(obj.id)  # print id of created object class
-
+            args_list = arg.split(" ")  # split cmd line into list
+            kw = {}
+            for args in args_list[1:]:
+                args_splited = args.split("=") 
+                args_splited[1] = eval(args_splited[1])
+                if type(args_splited[1]) is str:
+                    arg_splited[1] = args_splited[1].replace("_", " ").replace('"', '\\"')
+                kw[args_splited[0]] = args_splited[1]                                     
         except SyntaxError:
             print("** class name missing **")
-        except KeyError:
+        except NameError:
             print("** class doesn't exist **")
+        new_instance = HBNBCommand.classes[args_list[0]](**kw)
+        new_instance.save()
+        print(new_instance.id)
+
 
 
     def help_create(self):
