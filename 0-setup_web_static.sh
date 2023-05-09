@@ -5,13 +5,14 @@ if [ ! -x "$(command -v nginx)" ]; then
     sudo apt-get install -y nginx
 fi
 
-sudo mkdir -p /data/web_static/releases/test /data/web_static/shared /data/web_static/current
+sudo mkdir -p /data/web_static/releases/test /data/web_static/shared
 
 echo "<html><head><title>Test Page</title></head><body><h1>This is a test</h1></body></html>" | sudo tee /data/web_static/releases/test/index.html
 
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 
-sudo chown -R ubuntu:ubuntu /data/
+sudo chown -R ubuntu /data/
+sudo chgrp -R ubuntu /data/
 
 printf %s "server {
     listen 80 default_server;
@@ -20,7 +21,7 @@ printf %s "server {
     root   /var/www/html;
     index  index.html index.htm;
      
-    location /hbnb_static/ {
+    location /hbnb_static {
         alias /data/web_static/current/;
         index index.html index.htm;
     }
