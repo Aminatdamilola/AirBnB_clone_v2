@@ -1,39 +1,23 @@
 #!/usr/bin/python3
-<<<<<<< HEAD
 # Fabric script that generates a .tgz archive from the contents of the
 # web_static folder
-
 import os.path
 from datetime import datetime
 from fabric.api import local
 
 
 def do_pack():
-    """create .tgz file and archive the contents of web_static folder"""
-    local("mkdir -p versions")
-
-    time_str = datetime.now().strftime("%Y%m%d%H%M%S")
-
-    archive_name = "web_static_{}.tgz".format(time_str)
-    result = local("tar -czvf versions/{} web_static".format(archive_name))
-
-    if result.failed:
+    """Create a tar gzipped archive of the directory web_static."""
+    dt = datetime.utcnow()
+    file = "versions/web_static_{}{}{}{}{}{}.tgz".format(dt.year,
+                                                         dt.month,
+                                                         dt.day,
+                                                         dt.hour,
+                                                         dt.minute,
+                                                         dt.second)
+    if os.path.isdir("versions") is False:
+        if local("mkdir -p versions").failed is True:
+            return None
+    if local("tar -cvzf {} web_static".format(file)).failed is True:
         return None
-
-    return "versions/{}".format(archive_name)
-=======
-#Fabric script that generates a .tgz archive from the contents of the web_static folder 
-import os
-from datetime import datetime
-from fabric.api import local
-
-def do_pack():
-     """create .tgz file and archive the contents of web_static folder"""
-local("mkdir -p versions")
-time_str = datetime.now().strftime("%Y%m%d%H%M%S")
-archive_name = "web_static_{}.tgz".format(time_str)
-    result = local("tar -czvf versions/{} web_static".format(archive_name))
- if result.failed:
-        return None
-return "versions/{}".format(archive_name)
->>>>>>> bd5d86b285c1b35775aee0cef6341b6dee877e6f
+    return file
