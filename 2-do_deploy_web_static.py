@@ -1,5 +1,9 @@
 #!/usr/bin/python3
+<<<<<<< HEAD
 # Fabric script that distributes an archive to your web servers
+=======
+#Fabric script that distributes an archive to your web servers 
+>>>>>>> ad352c6051764fa3e01e5280f5cbd845c02defec
 import os.path
 from fabric.api import env
 from fabric.api import put
