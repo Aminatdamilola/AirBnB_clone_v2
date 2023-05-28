@@ -33,32 +33,36 @@ class DBStorage:
         """
         # create engine
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}:3306/{}'.
-                                      format(getenv('HBNB_MYSQL_USER'),
-                                             getenv('HBNB_MYSQL_PWD'),
-                                             getenv('HBNB_MYSQL_HOST'),
-                                             getenv('HBNB_MYSQL_DB')),
+                                      format(getenv("HBNB_MYSQL_USER"),
+                                             getenv("HBNB_MYSQL_PWD"),
+                                             getenv("HBNB_MYSQL_HOST"),
+                                             getenv("HBNB_MYSQL_DB")),
                                       pool_pre_ping=True)
         # drop tables if test environment
-        if getenv('HBNB_ENV') == 'test':
+        if getenv("HBNB_ENV") == "test":
                 Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
         """Query and return all objects by class/generally
         Return: dictionary (<class-name>.<object-id>: <obj>)
         """
-        obj_dict = {}
+        dic = {}
 
         if cls:
-            for row in self.__session.query(cls).all():
-                # populate dict with objects from storage
-                obj_dict.update({'{}.{}'.
-                                format(type(cls).__name__, row.id,): row})
+            if type(cls) is str:
+                cls = eval(cls)
+            query = self.__session.query(cls)
+            for elem in query:
+                key = "{}.{}".format(type(elem).__name__, elem.id)
+                dic[key] = elem
         else:
-            for key, val in all_classes.items():
-                for row in self.__session.query(val):
-                    obj_dict.update({'{}.{}'.
-                                    format(type(row).__name__, row.id,): row})
-        return obj_dict
+            lista = [State, City, User, Place, Review, Amenity]
+            for clase in lista:
+                query = self.__session.query(clase)
+                for elem in query:
+                    key = "{}.{}".format(type(elem).__name__, elem.id)
+                    dic[key] = elem
+        return (dic)
 
     def new(self, obj):
         """Add object to current database session
@@ -74,26 +78,18 @@ class DBStorage:
         """Delete obj from database session
         """
         if obj:
-            # determine class from obj
-            cls_name = all_classes[type(obj).__name__]
-
-            # query class table and delete
-            self.__session.query(cls_name).\
-                filter(cls_name.id == obj.id).delete()
+            self.session.delete(obj)
 
     def reload(self):
         """Create database session
         """
         # create session from current engine
         Base.metadata.create_all(self.__engine)
-        # create db tables
-        session = sessionmaker(bind=self.__engine,
-                               expire_on_commit=False)
-        # previousy:
-        # Session = scoped_session(session)
-        self.__session = scoped_session(session)
+        sec = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(sec)
+        self.__session = Session()
 
     def close(self):
         """Close scoped session
         """
-        self.__session.remove()
+        self.__session.close()
